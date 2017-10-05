@@ -129,6 +129,11 @@ Line 59: Change the username and password that will be used to login to assetnot
 user_datastore.create_user(email='shubs', password='testing')
 ```
 
+Line 55: Change the username that will be used to login to assetnote
+```
+to_delete=User.query.filter_by(email='streaak').first()
+```
+
 5. Get pip:
 
 `apt-get install python-pip`
