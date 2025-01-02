@@ -1,20 +1,18 @@
-from flask import Flask, render_template, request, jsonify, url_for, redirect
+from flask import Flask, render_template, request, jsonify, redirect
 from flask_seasurf import SeaSurf
 from flask_sqlalchemy import SQLAlchemy
 from flask_security import Security, SQLAlchemyUserDatastore, \
-    UserMixin, RoleMixin, login_required, current_user
+    UserMixin, RoleMixin, login_required
 from urllib.parse import urljoin
 import config
 
-# Initialize Flask app and configurations
 app = Flask(__name__)
 app.config.from_object('config')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///assetnote.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqldb://root:testing@localhost:3389/assetnote'  # Use PyMySQL if necessary
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 csrf = SeaSurf(app)
 
-# Define database models
 roles_users = db.Table('roles_users',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
     db.Column('role_id', db.Integer, db.ForeignKey('role.id'))
@@ -31,13 +29,7 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(255))
     active = db.Column(db.Boolean, default=True)
     confirmed_at = db.Column(db.DateTime)
-    roles = db.relationship('Role', secondary=roles_users,
-                            backref=db.backref('users', lazy='dynamic'))
-    last_login_at = db.Column(db.DateTime)
-    current_login_at = db.Column(db.DateTime)
-    last_login_ip = db.Column(db.String(255))
-    current_login_ip = db.Column(db.String(255))
-    login_count = db.Column(db.Integer)
+    roles = db.relationship('Role', secondary=roles_users, backref=db.backref('users', lazy='dynamic'))
 
 class Domain(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -52,7 +44,6 @@ class SentNotification(db.Model):
     push_notification_key = db.Column(db.String(255))
     time_sent = db.Column(db.DateTime)
 
-# Setup Flask-Security
 user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 security = Security(app, user_datastore)
 
@@ -65,9 +56,6 @@ def create_user():
         db.session.commit()
     user_datastore.create_user(email='shubs', password='testing')
     db.session.commit()
-
-def make_external(url):
-    return urljoin(request.url_root, url)
 
 @app.route("/")
 @login_required
@@ -85,9 +73,7 @@ def manage():
 @login_required
 def get_domain_data():
     all_domains = Domain.query.all()
-    domain_data = [{"id": d.id, "domain": d.domain, "first_scan": d.first_scan,
-                    "push_notification_key": d.push_notification_key, "type": d.type} for d in all_domains]
-    return jsonify(data=domain_data)
+    return jsonify(data=[d.__dict__ for d in all_domains])
 
 @app.route("/api/add_domain", methods=["POST"])
 @login_required
