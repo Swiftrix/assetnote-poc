@@ -1,3 +1,6 @@
 [build]
-  command = "pip install -r requirements.txt && python manage.py runserver"
   publish = "public"
+  command = "pip install -r requirements.txt && python manage.py runserver"
+
+[build.environment]
+  PYTHON_VERSION = "3.10"
