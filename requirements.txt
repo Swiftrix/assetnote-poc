@@ -1,10 +1,6 @@
-Flask
-Flask-SeaSurf
-SQLAlchemy
-Flask-Security
-flask-sqlalchemy
-MySQL-python
-bcrypt
-python-pushover
-ndg-httpsclient
-pyasn1
+Flask==3.1.0
+Flask-SeaSurf==2.0.0
+Flask-SQLAlchemy==3.1.1
+Flask-Security==5.5.2
+SQLAlchemy==2.0.36
+mysqlclient==2.1.3
